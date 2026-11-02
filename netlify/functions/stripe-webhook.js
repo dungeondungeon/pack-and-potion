@@ -72,7 +72,7 @@ exports.handler = async (event) => {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   const resendKey = process.env.RESEND_API_KEY;
-  const to = process.env.ORDER_EMAIL_TO;
+  const to = (process.env.ORDER_EMAIL_TO || '').trim().toLowerCase();
   if (!secret || !stripeKey || !resendKey || !to) {
     console.error('stripe-webhook: missing env vars');
     return json(500, { error: 'Not configured.' });
