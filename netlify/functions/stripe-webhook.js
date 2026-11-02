@@ -115,7 +115,7 @@ exports.handler = async (event) => {
     return json(200, { sent: true });
   } catch (e) {
     console.error('stripe-webhook failure', e.message);
-    return json(500, { error: 'Failed; Stripe will retry.' }); // Stripe retries non-2xx
+    return json(500, { error: 'Failed; Stripe will retry.', detail: String(e.message).slice(0, 400) }); // Stripe retries non-2xx
   }
 };
 
