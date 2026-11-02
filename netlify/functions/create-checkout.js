@@ -52,8 +52,9 @@ exports.handler = async (event) => {
   const { items, error } = validateCart(body.cart);
   if (error) return json(400, { error });
 
-  // Redirect back to the site that served the request, never to a client-supplied URL.
-  const origin = process.env.URL || `https://${event.headers.host}`;
+  // Redirect back to the host that served this request (so deploy previews return to the
+  // preview, not production). process.env.URL is always the production URL on Netlify.
+  const origin = `https://${event.headers.host}`;
 
   try {
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
