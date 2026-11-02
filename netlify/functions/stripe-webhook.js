@@ -95,7 +95,7 @@ exports.handler = async (event) => {
     const auth = { Authorization: `Bearer ${stripeKey}` };
     const li = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(session.id)}/line_items?limit=100`, { headers: auth });
     const liData = await li.json();
-    if (!li.ok) throw new Error(`line_items ${li.status}`);
+    if (!li.ok) throw new Error(`line_items ${li.status}: ${liData.error && liData.error.message}`);
 
     const mail = buildEmail(session, liData.data || []);
     const res = await fetch('https://api.resend.com/emails', {
@@ -108,7 +108,10 @@ exports.handler = async (event) => {
         ...mail,
       }),
     });
-    if (!res.ok) throw new Error(`resend ${res.status}`);
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '');
+      throw new Error(`resend ${res.status}: ${detail.slice(0, 300)}`);
+    }
     return json(200, { sent: true });
   } catch (e) {
     console.error('stripe-webhook failure', e.message);
